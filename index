@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Odyssey Animal Island Practice</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #75c9df;
+      user-select: none;
+    }
+
+    .game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-width: 960px;
+      min-height: 650px;
+      overflow: hidden;
+      background-color: #78cde2;
+      background-image:
+        radial-gradient(circle at 8% 10%, transparent 0 22px, #fff 23px 29px, transparent 30px),
+        radial-gradient(circle at 13% 18%, transparent 0 42px, #fff 43px 49px, transparent 50px),
+        radial-gradient(circle at 31% 6%, transparent 0 30px, #fff 31px 37px, transparent 38px),
+        radial-gradient(circle at 41% 30%, transparent 0 40px, #fff 41px 48px, transparent 49px),
+        radial-gradient(circle at 62% 18%, transparent 0 44px, #fff 45px 52px, transparent 53px),
+        radial-gradient(circle at 79% 12%, transparent 0 29px, #fff 30px 36px, transparent 37px),
+        radial-gradient(circle at 88% 39%, transparent 0 47px, #fff 48px 55px, transparent 56px),
+        radial-gradient(circle at 18% 58%, transparent 0 50px, #fff 51px 58px, transparent 59px),
+        radial-gradient(circle at 46% 67%, transparent 0 34px, #fff 35px 42px, transparent 43px),
+        radial-gradient(circle at 72% 61%, transparent 0 55px, #fff 56px 64px, transparent 65px),
+        radial-gradient(circle at 93% 76%, transparent 0 42px, #fff 43px 50px, transparent 51px),
+        repeating-linear-gradient(171deg, rgba(28,119,151,.35) 0 2px, transparent 2px 12px),
+        repeating-linear-gradient(8deg, rgba(255,255,255,.24) 0 3px, transparent 3px 24px);
+    }
+    .wave-line { position:absolute; left:-8%; width:116%; height:90px; border-top:11px solid rgba(255,255,255,.95); border-radius:50%; pointer-events:none; }
+    .wave-line:nth-child(1){top:1%;transform:rotate(-8deg)} .wave-line:nth-child(2){top:15%;transform:rotate(7deg)}
+    .wave-line:nth-child(3){top:29%;transform:rotate(-8deg)} .wave-line:nth-child(4){top:44%;transform:rotate(7deg)}
+    .wave-line:nth-child(5){top:59%;transform:rotate(-8deg)} .wave-line:nth-child(6){top:74%;transform:rotate(7deg)}
+    .wave-line:nth-child(7){top:88%;transform:rotate(-8deg)}
+
+    .island {
+      position: absolute;
+      border-radius: 50%;
+      background: #ddc79f;
+      border: 3px solid rgba(83,63,32,.42);
+      box-shadow: 0 2px 0 rgba(0,0,0,.18);
+    }
+    .island h2 { position:absolute; top:22px; width:100%; margin:0; text-align:center; color:white; font-size:16px; font-weight:800; }
+    .start { left: 10%; top: 23%; width: 180px; height: 180px; }
+    .mid1 { left: 43%; top: 4%; width: 180px; height: 180px; }
+    .mid2 { right: 11%; top: 23%; width: 180px; height: 180px; }
+    .pen { left: 5%; bottom: 4%; width: 210px; height: 210px; }
+    .cage { right: 6%; bottom: 4%; width: 210px; height: 210px; }
+
+    .slot {
+      position:absolute; width:54px; height:54px; border-radius:50%; background:#fff; border:3px solid #8d7653;
+      display:flex; align-items:center; justify-content:center; font-size:31px; z-index:5;
+      cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, outline .12s ease;
+    }
+    .slot.animal:hover { transform:scale(1.08); box-shadow:0 3px 10px rgba(0,0,0,.22); }
+    .slot.selected { outline:5px solid #2760b7; }
+    .slot.orange { border-color:#ed4b16; } .slot.blue { border-color:#265eb7; } .slot.green { border-color:#3f4d25; }
+
+    .start .slot:nth-of-type(1), .mid1 .slot:nth-of-type(1), .mid2 .slot:nth-of-type(1) { left:45px; top:78px; }
+    .start .slot:nth-of-type(2), .mid1 .slot:nth-of-type(2), .mid2 .slot:nth-of-type(2) { left:100px; top:76px; }
+
+    .pen .slot:nth-of-type(1){left:22px;top:20px}.pen .slot:nth-of-type(2){left:84px;top:31px}.pen .slot:nth-of-type(3){left:144px;top:48px}
+    .pen .slot:nth-of-type(4){left:34px;top:84px}.pen .slot:nth-of-type(5){left:92px;top:94px}.pen .slot:nth-of-type(6){left:147px;top:108px}
+    .pen .slot:nth-of-type(7){left:54px;top:146px}
+    .cage .slot:nth-of-type(1){left:27px;top:26px}.cage .slot:nth-of-type(2){left:92px;top:30px}.cage .slot:nth-of-type(3){left:151px;top:48px}
+    .cage .slot:nth-of-type(4){left:42px;top:98px}.cage .slot:nth-of-type(5){left:104px;top:102px}.cage .slot:nth-of-type(6){left:154px;top:128px}
+    .cage .slot:nth-of-type(7){left:80px;top:149px}
+
+    .instructions { position:absolute; right:12.2%; top:10%; width:130px; height:35px; background:#f04a24; color:white; font-size:13px; font-weight:800; border:0; box-shadow:0 2px 0 rgba(0,0,0,.25); cursor:pointer; z-index:30; }
+    .boat { position:absolute; width:94px; height:154px; transform:rotate(8deg); z-index:12; pointer-events:none; transition:left .18s ease, bottom .18s ease; }
+    .boat-body { position:absolute; inset:8px 13px 0 13px; background:#c9b76d; border:5px solid #514226; border-radius:14px 14px 42px 42px; clip-path:polygon(16% 0,84% 0,92% 78%,50% 100%,8% 78%); }
+    .boat-body:before,.boat-body:after{content:"";position:absolute;top:35px;bottom:20px;width:5px;background:#514226}.boat-body:before{left:27px}.boat-body:after{right:27px}
+    .boat-slot { position:absolute; left:19px; top:-2px; width:56px; height:56px; border-radius:50%; background:white; border:4px solid #6d5736; display:flex; align-items:center; justify-content:center; font-size:31px; z-index:13; }
+
+    .congrats { position:absolute; right:7.2%; bottom:15.5%; width:185px; color:#1f5068; font-size:18px; font-weight:900; line-height:1.05; text-align:center; text-shadow:0 1px 0 rgba(255,255,255,.55); pointer-events:none; z-index:14; display:none; }
+    .congrats.show { display:block; }
+    .small { font-size:13px; font-weight:700; }
+    .hud { position:absolute; left:50%; bottom:2%; transform:translateX(-50%); z-index:40; display:flex; gap:10px; align-items:center; color:#123b49; font-weight:800; }
+    .hud button { border:0; background:#f04a24; color:white; font-weight:800; padding:9px 16px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.25); }
+    .message { position:absolute; left:50%; top:48%; transform:translate(-50%,-50%); min-width:380px; max-width:620px; padding:18px 22px; background:rgba(255,255,255,.96); border:4px solid #f04a24; color:#173d4b; text-align:center; font-weight:800; font-size:18px; display:none; z-index:60; box-shadow:0 7px 24px rgba(0,0,0,.28); }
+    .message.show { display:block; }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <div class="wave-line"></div><div class="wave-line"></div><div class="wave-line"></div><div class="wave-line"></div><div class="wave-line"></div><div class="wave-line"></div><div class="wave-line"></div>
+    <button class="instructions" onclick="showInstructions()">INSTRUCTIONS</button>
+
+    <section class="island start playable" data-island="1"><h2>1st Island</h2></section>
+    <section class="island mid1 playable" data-island="2"><h2>2nd Island</h2></section>
+    <section class="island mid2 playable" data-island="3"><h2>3rd Island</h2></section>
+    <section class="island pen playable" data-island="0"></section>
+    <section class="island cage playable" data-island="4"></section>
+
+    <div class="boat" id="boat"><div class="boat-slot" id="boatSlot"></div><div class="boat-body"></div></div>
+    <div class="congrats" id="congrats">Congratulations!<br><span class="small">Keep on getting animals<br>into this cage</span></div>
+    <div class="hud"><span>Moves: <span id="moves">0</span></span><button onclick="resetGame()">RESET</button><button onclick="undoMove()">UNDO</button></div>
+    <div class="message" id="message"></div>
+  </main>
+
+  <script>
+    // Rules copied from the photographed Odyssey instruction screen:
+    // 1. Move only one animal at a time, one island forward at a time.
+    // 2. Move an animal backwards from any location at any time.
+    // 3. You cannot move an animal forwards from an island unless there is another animal in the island with it.
+    //    Practical Odyssey behavior: a lone animal may move forward when there are no animals behind it,
+    //    because it is then the back-most animal in the chain and must be allowed to advance for the puzzle to finish.
+    // 4. Animals attack each other outside the first and last island only.
+    //    Lion eats everything except bird and elephant. Jackal eats dog/cat. Dog eats cat. Cat and dog eat bird.
+
+    const animals = [
+      { id:'lion', name:'Lion', icon:'🦁', color:'orange' },
+      { id:'bird', name:'Bird', icon:'🐦', color:'orange' },
+      { id:'elephant', name:'Elephant', icon:'🐘', color:'' },
+      { id:'jackal', name:'Jackal', icon:'🦊', color:'orange' },
+      { id:'dog', name:'Dog', icon:'🐕', color:'green' },
+      { id:'cat', name:'Cat', icon:'🐈‍⬛', color:'blue' },
+      { id:'donkey', name:'Donkey', icon:'🐴', color:'green' }
+    ];
+
+    const predators = {
+      // Odyssey rules + 7-animal donkey version:
+      // lion eats everything except bird and elephant
+      lion: ['jackal','dog','cat','donkey'],
+      jackal: ['dog','cat'],
+      dog: ['cat','bird'],
+      cat: ['bird']
+      // donkey has no attack rule in the instruction screen, so it is treated as non-predatory.
+    };
+
+    let state, selectedAnimal, moves, gameOver, history;
+
+    function initialState(){
+      return { lion:0, bird:0, elephant:0, jackal:0, dog:0, cat:0, donkey:0 };
+    }
+
+    function resetGame(){
+      state = initialState(); selectedAnimal = null; moves = 0; gameOver = false; history = [];
+      hideMessage(); render();
+    }
+
+    function render(){
+      document.querySelectorAll('.island').forEach(island => {
+        const label = island.querySelector('h2'); island.innerHTML = ''; if(label) island.appendChild(label);
+        island.onclick = () => moveSelectedTo(Number(island.dataset.island));
+      });
+
+      [0,1,2,3,4].forEach(islandNum => {
+        const island = document.querySelector(`[data-island="${islandNum}"]`);
+        const present = animals.filter(a => state[a.id] === islandNum);
+        const slotCount = islandNum === 0 || islandNum === 4 ? 7 : 2;
+        for(let i=0; i<slotCount; i++){
+          const slot = document.createElement('div');
+          const animal = present[i];
+          slot.className = 'slot ' + (animal ? `animal ${animal.color}` : 'empty');
+          if(animal){
+            slot.textContent = animal.icon; slot.title = animal.name;
+            slot.onclick = (e) => { e.stopPropagation(); selectAnimal(animal.id); };
+            if(selectedAnimal === animal.id) slot.classList.add('selected');
+          }
+          island.appendChild(slot);
+        }
+      });
+
+      document.getElementById('moves').textContent = moves;
+      document.getElementById('congrats').classList.toggle('show', animals.every(a => state[a.id] === 4));
+      document.getElementById('boatSlot').textContent = selectedAnimal ? animals.find(a => a.id === selectedAnimal).icon : '';
+      positionBoat(selectedAnimal ? state[selectedAnimal] : 0);
+    }
+
+    function positionBoat(pos){
+      const boat = document.getElementById('boat');
+      const positions = {
+        0:{left:'25%',bottom:'8%'}, 1:{left:'28%',bottom:'34%'}, 2:{left:'50%',bottom:'53%'}, 3:{left:'70%',bottom:'34%'}, 4:{left:'66.5%',bottom:'13.5%'}
+      };
+      boat.style.left = positions[pos].left; boat.style.bottom = positions[pos].bottom;
+    }
+
+    function selectAnimal(id){
+      if(gameOver) return;
+      selectedAnimal = selectedAnimal === id ? null : id;
+      render();
+    }
+
+    function moveSelectedTo(destination){
+      if(gameOver || !selectedAnimal) return;
+      const from = state[selectedAnimal];
+      if(destination === from) return;
+
+      const isForward = destination === from + 1;
+      const isBackward = destination < from;
+
+      if(!isForward && !isBackward){
+        flash('Illegal move: you may move one island forward only, or backwards to any previous island.'); return;
+      }
+
+      // Official-style forward rule:
+      // - Start area and final island are safe zones and are not blocked by the remain-with rule.
+      // - The numbered islands usually require a companion when moving forward.
+      // - But once there are no animals behind the selected animal, it is the back-most animal in the chain.
+      //   In that case it may move forward, otherwise the puzzle can become impossible to finish.
+      if(isForward && [1,2,3].includes(from)){
+        const companionOnCurrentIsland = animals.some(a => a.id !== selectedAnimal && state[a.id] === from);
+        const animalsBehind = animals.some(a => a.id !== selectedAnimal && state[a.id] < from);
+
+        if(!companionOnCurrentIsland && animalsBehind){
+          flash('Illegal move: another animal must be in this island before moving forward, unless this is the last/back-most animal in the chain.');
+          return;
+        }
+      }
+      // Safety is handled by findDanger() after each move, which matches the real puzzle goal:
+      // move all animals through safely without any animal killing another.
+
+      const oldState = {...state};
+      history.push({ state: oldState, moves, selectedAnimal });
+      state[selectedAnimal] = destination;
+      selectedAnimal = null; moves++;
+
+      const danger = findDanger();
+      if(danger){
+        gameOver = true; render();
+        flash(`Game Over: ${danger.predator} ate ${danger.prey} on ${danger.place}.`);
+        return;
+      }
+      render();
+      if(animals.every(a => state[a.id] === 4)){
+        gameOver = true; flash(`Congratulations! You solved it in ${moves} moves.`);
+      }
+    }
+
+    function findDanger(){
+      // The official instruction says attacks happen outside the first and last island only.
+      // So only the middle islands are dangerous: 1st Island, 2nd Island, 3rd Island.
+      for(const islandNum of [1,2,3]){
+        const ids = animals.filter(a => state[a.id] === islandNum).map(a => a.id);
+        for(const predator of Object.keys(predators)){
+          if(!ids.includes(predator)) continue;
+          for(const prey of predators[predator]){
+            if(ids.includes(prey)){
+              return { predator: cap(predator), prey: cap(prey), place: islandLabel(islandNum) };
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function undoMove(){
+      if(!history.length) return;
+      const last = history.pop(); state = last.state; moves = last.moves; selectedAnimal = last.selectedAnimal; gameOver = false; hideMessage(); render();
+    }
+
+    function islandLabel(n){ return n === 1 ? '1st Island' : n === 2 ? '2nd Island' : n === 3 ? '3rd Island' : n === 0 ? 'the starting area' : 'the final island'; }
+    function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+    function flash(text){ const m=document.getElementById('message'); m.textContent=text; m.classList.add('show'); clearTimeout(m.timer); m.timer=setTimeout(()=>{ if(!gameOver) hideMessage(); },2600); }
+    function hideMessage(){ document.getElementById('message').classList.remove('show'); }
+    function showInstructions(){ flash('Rules: move one animal at a time. Forward moves go one island at a time. Backward moves can go to any previous island. On the numbered islands, a lone animal can move forward only when there are no animals behind it. Animals attack only on the 1st, 2nd, and 3rd Island.'); }
+
+    resetGame();
+  </script>
+</body>
+</html>
